@@ -22,8 +22,8 @@ def parse_xml
       rules = {}
       rules[:fwname]        = @entry[:fwname]
       rules[:rulename]      = rule.xpath('@name').text
-      rules[:frominterface] = rule.xpath('./to/member').map(&:text).join("\r")
-      rules[:tointerface]   = rule.xpath('./from/member').map(&:text).join("\r")
+      rules[:frominterface] = rule.xpath('./from/member').map(&:text).join("\r")
+      rules[:tointerface]   = rule.xpath('./to/member').map(&:text).join("\r")
       rules[:source]        = rule.xpath('./source/member').map(&:text).join("\r")
       rules[:destination]   = rule.xpath('./destination/member').map(&:text).join("\r")
       rules[:sourceuser]    = rule.xpath('./source-user/member').map(&:text).join("\r")
