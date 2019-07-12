@@ -1,7 +1,8 @@
 #!/usr/bin/env ruby
 ##paloparser is a PaloAlto Firewall XML to CSV/Excel convertor.
+$VERBOSE = nil
 require 'nokogiri'
-require 'writeexcel'
+require 'axlsx'
 require 'pp'
 
 
@@ -10,15 +11,13 @@ require 'pp'
 @filename = @filename.gsub(" ", "_")
 
 
-def parse_xml
-  puts "Parsing XML...."
+def parse_xml(xml_section, rule_type)
   @rule_array = []
-  puts "Palo Alto Version: #{@palo_config.xpath('//config/@version').text}"
-  @palo_config.xpath('//config/devices/entry/vsys/entry').each do |entry|
+  @palo_config.xpath(xml_section).each do |entry|
     @entry = {}
     @entry[:fwname] = entry.xpath('@name').text
     @entry[:rules]  = []
-      entry.xpath('./rulebase/security/rules/entry').each do |rule|
+      entry.xpath(rule_type).each do |rule|
       rules = {}
       rules[:fwname]        = @entry[:fwname]
       rules[:rulename]      = rule.xpath('@name').text
@@ -42,26 +41,27 @@ def parse_xml
 end
 
 def create_excel_file
-  @xls_file  = "#{@filename}_Rules_EXCEL_#{Time.now.strftime("%d%b%Y_%H%M%S")}.xls"
-  @rules_xls = WriteExcel.new("#{@xls_file}")
+  @excel_file = "Palo_Rules_Excel_#{Time.now.strftime("%d%b%Y_%H%M%S")}.xlsx"
+  @p = Axlsx::Package.new
+  @wb = @p.workbook
 end
 
-
-def create_sheets
-  puts "Creating Excel File..."
-  rule_array = []
-  headers    = ['VSYS', 'Name', 'From Interface', 'To Interface', 'Source', 'Destination', 'User', 'Category', 'Application', 'Service', 'HIP-Profiles', 'Action', 'Description']
-  excel = @rules_xls.add_worksheet("RULES")
-  excel.write_col('A1', [headers])
-  parse_xml.each do |outer|
-    outer[:rules].each do |rules|
-      rule_array << rules.values
+def create_excel_data
+  create_excel_file
+  rule_types = {rulebase_security: ['//config/devices/entry/vsys/entry', './rulebase/security/rules/entry'], pre_rulebase_sec: ['//config/devices/entry/device-group/entry', './pre-rulebase/security/rules/entry'], post_rulebase_sec: ['//config/devices/entry/device-group/entry', './post-rulebase/security/rules/entry'], pre_rulebase_decrypt: ['//config/devices/entry/device-group/entry', './pre-rulebase/decryption/rules/entry'], post_rulebase_decrypt: ['//config/devices/entry/device-group/entry', './post-rulebase/decryption/rules/entry']}
+  headers    = ['VSYS/DeviceGroup', 'Name', 'From Interface', 'To Interface', 'Source', 'Destination', 'User', 'Category', 'Application', 'Service', 'HIP-Profiles', 'Action', 'Description']
+  rule_types.each do |key, value|
+    @wb.add_worksheet(:name => key.to_s) do |sheet|
+      sheet.add_row(headers)
+      parse_xml(value[0], value[1]).each do |outer|
+        outer[:rules].each do |rules|
+          sheet.add_row rules.values.to_a
+        end
+      end
     end
+    @p.serialize @excel_file
   end
-  excel.write_col('A2', rule_array)
-  @rules_xls.close
-  puts "...Done"
+  puts "Rules written to #{@excel_file}"
 end
 
-create_excel_file
-create_sheets
+create_excel_data
