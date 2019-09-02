@@ -4,6 +4,7 @@ $VERBOSE = nil
 require 'nokogiri'
 require 'axlsx'
 require 'pp'
+require 'colorize'
 
 
 @palo_config = Nokogiri::XML(File.read(ARGV[0]))
