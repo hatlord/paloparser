@@ -10,6 +10,14 @@ require 'pp'
 @filename    = File.basename ARGV[0], ".xml"
 @filename = @filename.gsub(" ", "_")
 
+def check_xml_errors
+  if @palo_config.errors.length > 0
+    puts "The Nipper XML you provided is malformed, the following errors should help:".upcase.red.bold
+    @palo_config.errors.each { |e| puts e.to_s.magenta.bold}
+    puts "While we will carry on, your report will almost certainly be incorrect, correct the XML before proceeding".upcase.red.bold
+    puts ":".red.bold * 76
+  end
+end
 
 def parse_xml(xml_section, rule_type)
   @rule_array = []
@@ -64,4 +72,5 @@ def create_excel_data
   puts "Rules written to #{@excel_file}"
 end
 
+check_xml_errors
 create_excel_data
