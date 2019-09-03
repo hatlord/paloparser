@@ -41,7 +41,8 @@ def parse_xml(xml_section, rule_type)
       rules[:hip_profiles]  = rule.xpath('./hip-profiles/member').map(&:text).join("\r")
       rules[:action]        = rule.xpath('./action').map(&:text).join("\r")
       rules[:description]   = rule.xpath('./description').map(&:text).join("\r")
-
+      rules[:disabled]      = rule.xpath('./disabled').map(&:text).join("\r")
+      
       @entry[:rules] << rules
     end
     @rule_array << @entry
