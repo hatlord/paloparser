@@ -42,7 +42,7 @@ def parse_xml(xml_section, rule_type)
       rules[:action]        = rule.xpath('./action').map(&:text).join("\r")
       rules[:description]   = rule.xpath('./description').map(&:text).join("\r")
       rules[:disabled]      = rule.xpath('./disabled').map(&:text).join("\r")
-      
+
       @entry[:rules] << rules
     end
     @rule_array << @entry
@@ -59,7 +59,7 @@ end
 def create_excel_data
   create_excel_file
   rule_types = {rulebase_security: ['//config/devices/entry/vsys/entry', './rulebase/security/rules/entry'], pre_rulebase_sec: ['//config/devices/entry/device-group/entry', './pre-rulebase/security/rules/entry'], post_rulebase_sec: ['//config/devices/entry/device-group/entry', './post-rulebase/security/rules/entry'], pre_rulebase_decrypt: ['//config/devices/entry/device-group/entry', './pre-rulebase/decryption/rules/entry'], post_rulebase_decrypt: ['//config/devices/entry/device-group/entry', './post-rulebase/decryption/rules/entry']}
-  headers    = ['VSYS/DeviceGroup', 'Name', 'From Interface', 'To Interface', 'Source', 'Destination', 'User', 'Category', 'Application', 'Service', 'HIP-Profiles', 'Action', 'Description']
+  headers    = ['VSYS/DeviceGroup', 'Name', 'From Interface', 'To Interface', 'Source', 'Destination', 'User', 'Category', 'Application', 'Service', 'HIP-Profiles', 'Action', 'Description', 'Disabled']
   rule_types.each do |key, value|
     @wb.add_worksheet(:name => key.to_s) do |sheet|
       sheet.add_row(headers)
